@@ -1,26 +1,20 @@
 from http import HTTPStatus
 
-from fastapi.testclient import TestClient
 
-from fast_zero.app import app
-
-
-def test_root_should_return_root_and_ola_bb():
-    client = TestClient(app)  # Arrange
-
+def test_root_should_return_root_and_ola_bb(client):
     response = client.get('/')  # Act
 
     assert response.status_code == HTTPStatus.OK  # Assert
     assert response.json() == {'message': 'Olá bb!'}  # Assert
 
 
-def test_olamundo_should_return_html_with_ola_mundo():
-    client = TestClient(app)
-
+def test_olamundo_should_return_html_with_ola_mundo(client):
     response = client.get('/olamundo')
 
     assert response.status_code == HTTPStatus.OK
-    assert response.text == """
+    assert (
+        response.text
+        == """
     <html>
       <head>
         <title> Nosso olá mundo!</title>
@@ -30,3 +24,59 @@ def test_olamundo_should_return_html_with_ola_mundo():
       </body>
     </html>
     """
+    )
+
+
+def test_create_user(client):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'testusername',
+            'password': 'password',
+            'email': 'test@test.com',
+        },
+    )
+
+    # Validar status code
+    assert response.status_code == HTTPStatus.CREATED
+    # Validar UserPublic
+    assert response.json() == {
+        'username': 'testusername',
+        'email': 'test@test.com',
+        'id': 1,
+    }
+
+
+def test_read_users(client):
+    response = client.get('/users/')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'users': [
+            {'username': 'testusername', 'email': 'test@test.com', 'id': 1}
+        ]
+    }
+
+
+def test_update_user(client):
+    response = client.put(
+        '/users/1',
+        json={
+            'username': 'testusername',
+            'email': 'test@test.com',
+            'password': 'password',
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'username': 'testusername',
+        'email': 'test@test.com',
+        'id': 1,
+    }
+
+
+def test_delete_user(client):
+    response = client.delete('/users/1')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {'message': 'User deleted'}
