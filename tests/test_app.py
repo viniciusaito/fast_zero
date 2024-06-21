@@ -59,28 +59,28 @@ def test_read_users(client):
 
 
 def test_update_user(client):
-    test_user = {
-        'username': 'testusername',
-        'email': 'test@test.com',
-        'password': 'password',
+    update_test_user = {
+        'username': 'testusername2',
+        'email': 'testusername2@test.com',
+        'password': 'password2',
     }
     response = client.put(
         '/users/1',
-        json=test_user,
+        json=update_test_user,
     )
     response_404_user_above_max = client.put(
         '/users/2',
-        json=test_user,
+        json=update_test_user,
     )
     response_404_user_below_min = client.put(
         '/users/0',
-        json=test_user,
+        json=update_test_user,
     )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'username': 'testusername',
-        'email': 'test@test.com',
+        'username': 'testusername2',
+        'email': 'testusername2@test.com',
         'id': 1,
     }
     assert response_404_user_above_max.status_code == HTTPStatus.NOT_FOUND
