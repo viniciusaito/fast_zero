@@ -12,6 +12,9 @@ pydantic = {extras = ["email"], version = "^2.7.4"}
 sqlalchemy = "^2.0.31"
 pydantic-settings = "^2.3.4"
 alembic = "^1.13.1"
+pwdlib = {extras = ["argon2"], version = "^0.2.0"}
+python-multipart = "^0.0.9"
+pyjwt = "^2.8.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.4.8"
@@ -41,7 +44,7 @@ format = 'ruff check . --fix && ruff format .'
 run = 'fastapi dev fast_zero/app.py'
 run_prod = 'fastapi dev fast_zero/app.py --host 0.0.0.0'
 pre_test = 'task lint'
-test = 'pytest -s -x --cov=fast_zero -vv'
+test = 'pytest -s --cov=fast_zero -vv'
 post_test = 'coverage html'
 
 [build-system]
