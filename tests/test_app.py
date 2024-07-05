@@ -116,6 +116,24 @@ def test_update_user(client, user, token):
     assert success.json() == user_schema
 
 
+def test_update_user_not_enough_permission(client, user, token):
+    update_test_user = {
+        'username': 'vini',
+        'email': 'vini@vini.com',
+        'password': 'vini',
+        'id': user.id,
+    }
+
+    not_enough_permission = client.put(
+        f'/users/{user.id + 1}',
+        headers={'Authorization': f'Bearer {token}'},
+        json=update_test_user,
+    )
+
+    assert not_enough_permission.status_code == HTTPStatus.BAD_REQUEST
+    assert not_enough_permission.json() == {'detail': 'Not enough permission'}
+
+
 def test_delete_user(client, user, token):
     success = client.delete(
         f'/users/{user.id}',
@@ -124,6 +142,16 @@ def test_delete_user(client, user, token):
 
     assert success.status_code == HTTPStatus.OK
     assert success.json() == {'message': 'User deleted'}
+
+
+def test_delete_user_not_enough_permission(client, user, token):
+    not_enough_permission = client.delete(
+        f'/users/{user.id + 1}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert not_enough_permission.status_code == HTTPStatus.BAD_REQUEST
+    assert not_enough_permission.json() == {'detail': 'Not enough permission'}
 
 
 def test_get_token(client, user):
@@ -136,3 +164,13 @@ def test_get_token(client, user):
     assert response.status_code == HTTPStatus.OK
     assert token['token_type'] == 'Bearer'
     assert 'access_token' in token
+
+
+def test_get_token_incorrect_email_or_password(client):
+    response = client.post(
+        '/token',
+        data={'username': 'not_a_user', 'password': 'not_a_password'},
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Incorrect email or password'}

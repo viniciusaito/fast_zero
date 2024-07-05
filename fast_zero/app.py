@@ -139,7 +139,8 @@ def login_for_access_token(
 
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
-            status_code=400, detail='Incorrect email or password'
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Incorrect email or password',
         )
 
     access_token = create_access_token(data={'sub': user.email})
