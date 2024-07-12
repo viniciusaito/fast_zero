@@ -4,7 +4,7 @@ from http import HTTPStatus
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt import decode, encode
-from jwt.exceptions import PyJWTError
+from jwt.exceptions import DecodeError, ExpiredSignatureError
 from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -60,7 +60,11 @@ def get_current_user(
         username: str = payload.get('sub')
         if not username:
             raise credentials_exception
-    except PyJWTError:
+
+    except DecodeError:
+        raise credentials_exception
+
+    except ExpiredSignatureError:
         raise credentials_exception
 
     user = session.scalar(select(User).where(User.email == username))
@@ -69,3 +73,12 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def test_token_wrong_password(client, user):
+    response = client.post(
+        '/auth/token',
+        data={'username': user.email, 'password': 'wrong_password'},
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Incorrect email or password'}
