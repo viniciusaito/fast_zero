@@ -40,9 +40,3 @@ class Todo:
     state: Mapped[TodoState]
     # Toda tarefa pertence a alguém
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    created_at: Mapped[datetime] = mapped_column(
-        init=False, server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        init=False, default=func.now(), onupdate=func.now(), nullable=True
-    )
