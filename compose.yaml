@@ -1,6 +1,6 @@
 services:
   fastzero_database:
-    image: postgres
+    image: postgres:16.10
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
@@ -20,6 +20,9 @@ services:
       - fastzero_database
     environment:
       DATABASE_URL: postgresql+psycopg://app_user:app_password@fastzero_database:5432/app_db
+      SECRET_KEY: your-secret-key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
 
 volumes:
   pgdata:
