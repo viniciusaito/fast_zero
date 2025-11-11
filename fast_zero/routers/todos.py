@@ -52,16 +52,41 @@ def list_todos(  # noqa
     offset: int | None = None,
     limit: int | None = None,
 ):
+    """
+    Retrieve a list of TODOs for the current user with optional
+    search and filtering.
+
+    - Filter by title or description keywords (case-insensitive).
+    - Filter by completion state.
+    - Supports pagination via offset and limit.
+
+    Args:
+        session (Session): SQLAlchemy session dependency.
+        user (User): Authenticated user dependency.
+        title (str | None): Optional title keyword to search.
+        description (str | None): Optional description keyword to search.
+        state (TodoState | None): Optional state filter.
+        offset (int | None): Optional pagination offset.
+        limit (int | None): Optional pagination limit.
+
+    Returns:
+        dict: A dictionary containing the filtered list of TODOs.
+    """
     query = select(Todo).where(Todo.user_id == user.id)
 
-    if title:  # o título contém
-        query = query.filter(Todo.title.contains(title))
-    if description:  # a descrição contém
-        query = query.filter(Todo.description.contains(description))
-    if state:  # o estado é igual
+    if title:
+        query = query.filter(Todo.title.ilike(f'%{title}%'))
+    if description:
+        query = query.filter(Todo.description.ilike(f'%{description}%'))
+    if state:
         query = query.filter(Todo.state == state)
 
-    todos = session.scalars(query.offset(offset).limit(limit)).all()
+    if offset is not None:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+
+    todos = session.scalars(query).all()
 
     return {'todos': todos}
 
