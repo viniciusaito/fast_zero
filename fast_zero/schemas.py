@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 from fast_zero.models import TodoState
@@ -51,3 +54,9 @@ class TodoUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     state: TodoState | None = None
+
+
+class HealthCheck(BaseModel):
+    app_status: Literal['ok', 'error']
+    database_status: Literal['ok', 'error']
+    timestamp: datetime
